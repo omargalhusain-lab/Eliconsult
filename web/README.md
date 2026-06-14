@@ -25,9 +25,16 @@ The build output contains:
 - `filflex/index.html`
 - `assets/`
 - `favicon.svg`
+- `submit-form.php`
 
-No Node.js runtime, `npm start`, PM2, Express, SSR, server functions, Cloudflare Worker, or API routes are required after upload.
+No Node.js runtime, `npm start`, PM2, Express, SSR, Cloudflare Worker, or JavaScript server is required after upload. Standard cPanel PHP must be enabled for `submit-form.php`.
 
 ## Contact Forms
 
-The contact and FILFLEX access forms use a static `mailto:` flow. Submitting a form opens an email draft to `info@eliconsult.com` with the submitted fields in the email body.
+The main contact form and FILFLEX access request form submit with AJAX to:
+
+```text
+/submit-form.php
+```
+
+The PHP handler validates and sanitizes submissions, applies honeypot and IP rate-limit checks, and sends emails to `info@eliconsults.com`.

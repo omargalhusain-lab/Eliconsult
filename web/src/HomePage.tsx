@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import InquiryForm from "./components/InquiryForm";
 import Logo from "./components/Logo";
+import filflexLoginIcon from "./assets/filflex-login-icon.svg";
 import heroDubaiNight from "./assets/site-assets/hero-dubai-night.jpg";
 import marketingMeeting from "./assets/site-assets/marketing-meeting.png";
 import storyDubaiDay from "./assets/site-assets/story-dubai-day.jpg";
@@ -8,8 +9,8 @@ import trainingModel from "./assets/site-assets/training-model.jpg";
 
 const stats = [
   ["500+", "Corporate Partners"],
-  ["10K+", "Units Listed"],
-  ["50+", "Developer Partners"],
+  ["100K+", "Units Listed"],
+  ["500+", "Developer Partners"],
   ["98%", "Client Satisfaction"],
 ];
 
@@ -187,9 +188,11 @@ export default function Home() {
             <a href="#services">Services</a>
             <a href="#contact">Contact Us</a>
           </nav>
-          <a className="login-pill" href="filflex/">
+          <a className="login-pill" href="./filflex/">
             Login to
-            <span aria-hidden="true">&#8599;</span>
+            <span aria-hidden="true">
+              <img src={filflexLoginIcon} alt="" />
+            </span>
           </a>
         </header>
         <div
@@ -380,8 +383,12 @@ export default function Home() {
 
         <article className="service-row filflex-row">
           <div className="filflex-card">
-            <Logo />
-            <a href="filflex/">Search Easier, Close Faster</a>
+            <img
+              className="filflex-card-logo"
+              src={filflexLoginIcon}
+              alt="FILFLEX"
+            />
+            <a href="./filflex/">Search Easier, Close Faster</a>
           </div>
           <div>
             <h3>FILFLEX: Smart Property-Search Engine</h3>
@@ -413,7 +420,7 @@ export default function Home() {
         <InquiryForm
           buttonLabel="Submit Request"
           fields={contactFields}
-          mailSubject="Eliconsult website inquiry"
+          formType="main_contact"
           messageField={{
             name: "message",
             label: "Message *",
@@ -433,7 +440,7 @@ export default function Home() {
             developer inventory and enables instant unit discovery for corporate
             teams.
           </span>
-          <a href="filflex/">Login to FILFLEX</a>
+          <a href="./filflex/">Login to FILFLEX</a>
         </div>
       </section>
 
@@ -457,12 +464,12 @@ export default function Home() {
             <h3>Services</h3>
             <a href="#services">Real Estate Marketing</a>
             <a href="#services">UAE Project Training</a>
-            <a href="filflex/">FILFLEX Platform</a>
+            <a href="./filflex/">FILFLEX Platform</a>
           </div>
           <div>
             <h3>Contact</h3>
-            <a href="mailto:info@eliconsult.com">info@eliconsult.com</a>
-            <a href="tel:+97140000000">+971 4 000 0000</a>
+            <span>info@eliconsults.com</span>
+            <a href="tel:+97145667881">+971 4 566 7881</a>
             <span>Dubai, United Arab Emirates</span>
           </div>
         </div>

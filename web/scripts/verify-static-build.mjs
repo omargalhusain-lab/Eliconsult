@@ -6,6 +6,7 @@ const requiredFiles = [
   "index.html",
   "filflex/index.html",
   "favicon.svg",
+  "submit-form.php",
 ];
 const forbiddenPaths = [
   "server",
@@ -14,6 +15,7 @@ const forbiddenPaths = [
   "wrangler.json",
   "_headers",
 ];
+const mailtoPattern = new RegExp("mail" + "to:", "i");
 
 function fail(message) {
   console.error(`Static build verification failed: ${message}`);
@@ -29,6 +31,10 @@ function walk(dir) {
     const path = join(dir, entry);
     return statSync(path).isDirectory() ? walk(path) : [path];
   });
+}
+
+function isTextFile(file) {
+  return /\.(html|css|js|json|php|svg|txt|xml)$/i.test(file);
 }
 
 if (!existsSync(dist)) {
@@ -53,12 +59,51 @@ if (!existsSync(dist)) {
     }
   }
 
+  let hasFormEndpoint = false;
+  const submitFormPhp = join(dist, "submit-form.php");
+  const submitFormContent = existsSync(submitFormPhp)
+    ? readFileSync(submitFormPhp, "utf8")
+    : "";
+
+  if (!/const DESTINATION_EMAIL = 'info@eliconsults\.com';/.test(submitFormContent)) {
+    fail("dist/submit-form.php must send to info@eliconsults.com.");
+  }
+  if (/X-Mailer|phpversion\s*\(/i.test(submitFormContent)) {
+    fail("dist/submit-form.php exposes server implementation details.");
+  }
+  if (!/Main Contact Form/.test(submitFormContent) || !/FILFLEX Access Request Form/.test(submitFormContent)) {
+    fail("dist/submit-form.php must support both production forms.");
+  }
+  if (!/Eliconsults - Main Contact Form/.test(submitFormContent) || !/Eliconsults - FILFLEX Access Request Form/.test(submitFormContent)) {
+    fail("dist/submit-form.php subjects must include the form type.");
+  }
+  if (!/\$_SERVER\['REQUEST_METHOD'\]\s*!==\s*'POST'/.test(submitFormContent)) {
+    fail("dist/submit-form.php must reject non-POST requests.");
+  }
+  if (!/Content-Type: application\/json; charset=UTF-8/.test(submitFormContent)) {
+    fail("dist/submit-form.php must return UTF-8 JSON responses.");
+  }
+
   for (const file of walk(dist)) {
-    if (!/\.(html|css)$/i.test(file)) {
+    if (!isTextFile(file)) {
       continue;
     }
 
     const content = readFileSync(file, "utf8");
+    if (mailtoPattern.test(content)) {
+      fail(`${file} contains mailto functionality.`);
+    }
+    if (/info@eliconsult\.com/i.test(content)) {
+      fail(`${file} contains the old singular-domain email address.`);
+    }
+    if (/\/submit-form\.php/.test(content)) {
+      hasFormEndpoint = true;
+    }
+
+    if (!/\.(html|css)$/i.test(file)) {
+      continue;
+    }
+
     const contentForMarkupChecks = file.endsWith(".html")
       ? content.replace(/<script\b(?![^>]*\bsrc=)[\s\S]*?<\/script>/gi, "")
       : content;
@@ -75,6 +120,10 @@ if (!existsSync(dist)) {
     if (/_next|_vinext|react-server|server\/index/i.test(contentForMarkupChecks)) {
       fail(`${file} contains server-framework output references.`);
     }
+  }
+
+  if (!hasFormEndpoint) {
+    fail("dist output does not reference /submit-form.php for form submissions.");
   }
 }
 

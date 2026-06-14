@@ -15,50 +15,80 @@ type InquiryFormProps = {
   fields: Field[];
   messageField?: Field;
   buttonLabel: string;
-  mailSubject?: string;
+  formType: "main_contact" | "filflex_access";
   successMessage: string;
   compact?: boolean;
 };
 
-const RECIPIENT_EMAIL = "info@eliconsult.com";
+type SubmitState = "idle" | "submitting" | "success" | "error";
+
+const FORM_ENDPOINT = "/submit-form.php";
 
 export default function InquiryForm({
   fields,
   messageField,
   buttonLabel,
-  mailSubject = "Eliconsult website inquiry",
+  formType,
   successMessage,
   compact = false,
 }: InquiryFormProps) {
-  const [submitted, setSubmitted] = useState(false);
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [responseMessage, setResponseMessage] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const allFields = messageField ? [...fields, messageField] : fields;
-    const body = allFields
-      .map((field) => {
-        const value = formData.get(field.name)?.toString().trim() || "-";
-        return `${field.label.replace(" *", "")}: ${value}`;
-      })
-      .join("\n");
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    formData.set("form_type", formType);
+    formData.set("page_url", window.location.href);
 
-    const subjectValue = formData.get("subject")?.toString().trim();
-    const subject = subjectValue
-      ? `${mailSubject}: ${subjectValue}`
-      : mailSubject;
+    setSubmitState("submitting");
+    setResponseMessage("");
 
-    window.location.href = `mailto:${RECIPIENT_EMAIL}?subject=${encodeURIComponent(
-      subject,
-    )}&body=${encodeURIComponent(body)}`;
-    setSubmitted(true);
+    try {
+      const response = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+        },
+        body: formData,
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | { success?: boolean; message?: string }
+        | null;
+
+      if (response.ok && payload?.success) {
+        setSubmitState("success");
+        setResponseMessage(payload.message || successMessage);
+        form.reset();
+        return;
+      }
+
+      setSubmitState("error");
+      setResponseMessage(payload?.message || "Failed to submit request.");
+    } catch {
+      setSubmitState("error");
+      setResponseMessage("Failed to submit request.");
+    }
   }
 
   return (
     <form
+      action={FORM_ENDPOINT}
       className={compact ? "inquiry-form inquiry-form--compact" : "inquiry-form"}
+      method="post"
       onSubmit={handleSubmit}
     >
+      <input name="form_type" type="hidden" value={formType} />
+      <label className="form-honeypot" aria-hidden="true">
+        <span>Website</span>
+        <input
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          type="text"
+        />
+      </label>
       <div className="form-grid">
         {fields.map((field) => (
           <label
@@ -86,13 +116,21 @@ export default function InquiryForm({
           </label>
         ) : null}
       </div>
-      <button className="form-submit" type="submit">
-        {buttonLabel}
+      <button
+        className="form-submit"
+        disabled={submitState === "submitting"}
+        type="submit"
+      >
+        {submitState === "submitting" ? "Sending..." : buttonLabel}
       </button>
-      {submitted ? (
-        <p className="form-success">
-          {successMessage} If your email app did not open, email{" "}
-          <a href={`mailto:${RECIPIENT_EMAIL}`}>{RECIPIENT_EMAIL}</a>.
+      {submitState === "success" ? (
+        <p className="form-success" role="status" aria-live="polite">
+          {responseMessage || successMessage}
+        </p>
+      ) : null}
+      {submitState === "error" ? (
+        <p className="form-error" role="alert">
+          {responseMessage || "Failed to submit request."}
         </p>
       ) : null}
     </form>
