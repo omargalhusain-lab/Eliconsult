@@ -600,8 +600,8 @@ img {
   min-height: 520px;
   place-items: center;
   background:
-    linear-gradient(rgba(12, 27, 66, 0.9), rgba(12, 27, 66, 0.9)),
-    url("/site-assets/filflex-banner.png") center / cover no-repeat;
+    radial-gradient(circle at 50% 15%, rgba(74, 127, 167, 0.22), transparent 42%),
+    var(--navy);
   color: #ffffff;
   padding: 86px 24px;
   text-align: center;
@@ -674,8 +674,8 @@ img {
   font-weight: 900;
 }
 
-.footer-main a,
-.footer-main span {
+.footer-main > div:not(.footer-brand) a,
+.footer-main > div:not(.footer-brand) span {
   display: block;
   margin: 0 0 12px;
   color: var(--blue);
