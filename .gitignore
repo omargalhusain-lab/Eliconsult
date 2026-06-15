@@ -21,7 +21,7 @@ out/
 .DS_Store
 *.pem
 *.zip
-!eliconsults-cpanel-production.zip
+!eliconsults-cpanel-final.zip
 .cache/
 .vite/
 
