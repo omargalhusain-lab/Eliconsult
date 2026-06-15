@@ -21,6 +21,7 @@ out/
 .DS_Store
 *.pem
 *.zip
+!eliconsults-cpanel-production.zip
 .cache/
 .vite/
 
@@ -41,4 +42,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 dist/
+!web/dist/
+!web/dist/**
 .wrangler/

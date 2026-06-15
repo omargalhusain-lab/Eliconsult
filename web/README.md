@@ -1,15 +1,6 @@
-# Eliconsult Static Website
+# Eliconsults cPanel Upload
 
-This folder contains the static cPanel-ready website source.
-
-## Build Commands
-
-```bash
-npm install
-npm run build
-```
-
-## Deployment Folder
+This folder now keeps only the cPanel-ready website package.
 
 Upload the contents of:
 
@@ -17,9 +8,9 @@ Upload the contents of:
 dist/
 ```
 
-directly into `public_html/` on standard cPanel hosting.
+directly into `public_html/`.
 
-The build output contains:
+The upload folder contains:
 
 - `index.html`
 - `filflex/index.html`
@@ -27,14 +18,6 @@ The build output contains:
 - `favicon.svg`
 - `submit-form.php`
 
-No Node.js runtime, `npm start`, PM2, Express, SSR, Cloudflare Worker, or JavaScript server is required after upload. Standard cPanel PHP must be enabled for `submit-form.php`.
+No Node.js, npm, Vite, SSR, Express, PM2, or server runtime is required on hosting. Standard cPanel PHP must be enabled for `submit-form.php`.
 
-## Contact Forms
-
-The main contact form and FILFLEX access request form submit with AJAX to:
-
-```text
-/submit-form.php
-```
-
-The PHP handler validates and sanitizes submissions, applies honeypot and IP rate-limit checks, and sends emails to `info@eliconsults.com`.
+Contact forms submit with AJAX to `/submit-form.php`, and the PHP handler sends requests to `info@eliconsults.com`.
